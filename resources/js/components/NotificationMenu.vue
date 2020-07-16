@@ -1,5 +1,5 @@
 <template>
-  <v-toolbar-items class="pt-3">
+  <v-toolbar-items class="pt-4">
     <div v-if="isLoggedIn">
       <v-badge
         :content="notifications.length"
@@ -40,19 +40,17 @@
 
 <script>
   import alarm from '@/images/alarm.svg'
-  import avatar from '@/images/avatar.png'
   export default {
     name: 'NotificationMenu',
-    data: () => ({
-      icons: {
-        alarm,
-      },
-      isLoggedIn: true, // placeholder; to be replaced by robust authentication system
-      notifications: [], // displays a badge over the notifications icon, if non-zero
-      user: {
-        avatar,
-        name: 'Molly Green',
-      },
-    }),
+    data() {
+      return {
+        icons: {
+          alarm,
+        },
+        isLoggedIn: true, // placeholder; to be replaced by robust authentication system
+        notifications: [], // displays a badge over the notifications icon, if non-zero
+        user: this.$store.state.user
+      }
+    },
   }
 </script>

@@ -18,18 +18,27 @@
       <v-spacer />
       <notification-menu />
     </v-app-bar>
-    <v-content>
-
-    </v-content>
+    <v-main>
+      <v-container fluid class="pa-0">
+        <!-- NOTE: If adapted to become a multi-page app, router output would go here -->
+        <your-balance-page />
+      </v-container>
+    </v-main>
   </v-app>
 </template>
 
 <script>
   import NotificationMenu from '@/js/components/NotificationMenu'
+  import YourBalancePage from '@/js/components/YourBalancePage'
   export default {
     name: 'App',
     components: {
       NotificationMenu,
+      YourBalancePage,
+    },
+    mounted () {
+      // load entries from the API
+      this.$store.dispatch('loadEntries')
     },
   }
 </script>
