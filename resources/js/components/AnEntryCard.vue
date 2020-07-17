@@ -158,7 +158,6 @@
       },
       update () {
         if (this.isEditing) {
-          console.log(this.entry, this.isEditing)
           this.$store.dispatch('updateEntry', this.entry)
           this.isEditing = false
         } else {

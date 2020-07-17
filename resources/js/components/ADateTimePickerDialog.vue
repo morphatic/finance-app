@@ -70,7 +70,6 @@
     props: {
       value: {
         type: String,
-        // default: (new Date()).toISOString()
         default: () => {
           // necessary to adjust the default datetime to account for timezone differences
           const d = new Date()
@@ -93,21 +92,6 @@
       }
     },
     computed: {
-      // // adjustment necessary because the timepicker does not adjust for timezone automatically
-      // adjustedTime: {
-      //   get () {
-      //     // convert UTC to a local time string and extract the bits necessary for the picker
-      //     return (new Date(this.datetime)).toTimeString().substr(0, 8)
-      //   },
-      //   set (val) {
-      //     // use the value currently set in the picker to construct a (wrong) UTC datetime
-      //     const d = new Date(this.date + 'T' + val + 'Z')
-      //     // adjust it for the timezone of the user and use the time part to set the time to be stored
-      //     const d2 = add(d, { minutes: d.getTimezoneOffset() })
-      //     this.time = d2.toISOString().substr(11, 8)
-      //     console.log(d, d2, this.time)
-      //   }
-      // },
       datetime () {
         return this.date + 'T' + this.time + this.offset
       },
