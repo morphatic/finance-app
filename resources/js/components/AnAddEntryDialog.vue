@@ -10,12 +10,14 @@
         class="ml-3"
         color="primary"
         v-on="on"
+        @click="resetForm"
       >
         <v-icon>{{ icons.add }}</v-icon>
         Add Entry
       </v-btn>
     </template>
     <an-entry-card
+      ref="entryCard"
       v-model="entry"
       :isNew="true"
       @cancel="cancel"
@@ -39,7 +41,8 @@
         default: () => ({
           id: 0,
           label: '',
-          date: (new Date()).toISOString(),
+          date: undefined,
+          user_id: 1,
           value: 0,
         }),
       },
@@ -56,6 +59,11 @@
     methods: {
       cancel () {
         this.showDialog = false
+      },
+      resetForm () {
+        if (typeof this.$refs.entryCard !== 'undefined') {
+          this.$refs.entryCard.resetForm()
+        }
       },
       save () {
         this.$emit('save', this.entry)

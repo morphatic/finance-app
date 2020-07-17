@@ -51,7 +51,8 @@
     }),
     methods: {
       save (entry) {
-        console.log(entry)
+        // console.log(entry)
+        this.$store.dispatch('addEntry', entry)
       },
     },
   }

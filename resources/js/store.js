@@ -45,11 +45,27 @@ export const store = new Vuex.Store({
     },
     [UPDATE_ENTRY] (state, entry) {
       const i = state.entries.findIndex(e => e.id === entry.id)
-      state.entries = [...state.entries.slice(0, i - 1), entry, ...state.entries.slice(i)].sort(entrySorter)
+      if (i === 0) {
+        state.entries = [entry, ...state.entries.slice(1)].sort(entrySorter)
+      } else if (i === state.entries.length - 1) {
+        state.entries = [...state.entries.slice(-1), entry].sort(entrySorter)
+      } else {
+        state.entries = [...state.entries.slice(0, i - 1), entry, ...state.entries.slice(i)].sort(entrySorter)
+      }
     },
     [DELETE_ENTRY] (state, id) {
-      const i = state.entries.findIndex(e => e.id === id)
-      state.entries = [...state.entries.slice(0, i - 1), ...state.entries.slice(i)]
+      if (state.entries.length === 1) {
+        state.entries = []
+      } else {
+        const i = state.entries.findIndex(e => e.id === id)
+        if (i === 0) {
+          state.entries = state.entries.slice(1)
+        } else if (i === state.entries.length - 1) {
+          state.entries = state.entries.slice(i)
+        } else {
+          state.entries = [...state.entries.slice(0, i - 1), ...state.entries.slice(i)]
+        }
+      }
     },
   },
   actions: {
@@ -80,11 +96,12 @@ export const store = new Vuex.Store({
     addEntry ({ commit }, entry) {
       commit(SET_UPDATING, true)
       // convert date to MYSQL/PHP date format before uploading
-      axios.post('/api/entries', { ...entry, date: entry.date.substr(0, 10) + ' ' + entry.date.substr(11, 8) })
+      // axios.post('/api/entries', { ...entry, date: entry.date.substr(0, 10) + ' ' + entry.date.substr(11, 8) })
+      axios.post('/api/entries', entry)
         // then transform returned date into ISO 8601 format
-        .then(({ data: entry }) => ({ ...entry, date: (new Date(entry.date)).toISOString() }))
+        // .then(({ data: entry }) => ({ ...entry, date: (new Date(entry.date)).toISOString() }))
         // then update the store
-        .then(entry => { commit(ADD_ENTRY, entry) })
+        .then(({ data: entry }) => { commit(ADD_ENTRY, entry) })
         // catch errors
         .catch(error => { commit(SET_ERROR, error) })
         // unset the updating flag
@@ -93,7 +110,8 @@ export const store = new Vuex.Store({
     updateEntry ({ commit }, entry) {
       commit(SET_UPDATING, true)
       // convert date to MYSQL/PHP date format before uploading
-      axios.put('/api/entries/' + entry.id, { ...entry, date: entry.date.substr(0, 10) + ' ' + entry.date.substr(11, 8) })
+      // axios.put('/api/entries/' + entry.id, { ...entry, date: entry.date.substr(0, 10) + ' ' + entry.date.substr(11, 8) })
+      axios.put('/api/entries/' + entry.id, entry)
         // then transform returned date into ISO 8601 format
         .then(({ data: entry }) => ({ ...entry, date: (new Date(entry.date)).toISOString() }))
         // then update the store
@@ -103,12 +121,12 @@ export const store = new Vuex.Store({
         // unset the updating flag
         .finally(() => { commit(SET_UPDATING, false) })
     },
-    deleteEntry ({ commit }, entry) {
+    deleteEntry ({ commit }, id) {
       commit(SET_UPDATING, true)
       // convert date to MYSQL/PHP date format before uploading
-      axios.delete('/api/entries' + entry.id)
+      axios.delete('/api/entries/' + id)
         // then update the store
-        .then(() => { commit(DELETE_ENTRY, entry.id) })
+        .then(() => { commit(DELETE_ENTRY, id) })
         // catch errors
         .catch(error => { commit(SET_ERROR, error) })
         // unset the updating flag

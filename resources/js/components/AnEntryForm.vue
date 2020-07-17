@@ -17,7 +17,7 @@
       <v-col cols="4">
         <span style="font-weight: 600; text-transform: uppercase;font-size: .75rem;">Date</span>
         <!-- entry.date should be an ISO 8601 formatted datetime string -->
-        <a-date-time-picker-dialog v-model="entry.date" />
+        <a-date-time-picker-dialog ref="datetimePicker" v-model="entry.date" />
       </v-col>
       <v-col cols="3">
         <span style="font-weight: 600; text-transform: uppercase;font-size: .75rem;">Amount</span>
@@ -35,7 +35,7 @@
           required
           single-line
           validate-on-blur
-          @change="updateValue"
+          @change="entry.value = parseFloat($event)"
         />
       </v-col>
     </v-row>
@@ -57,7 +57,8 @@
         default: () => ({
           id: 0,
           label: '',
-          date: '',
+          date: undefined,
+          user_id: 1,
           value: 0,
         }),
       },
@@ -68,8 +69,12 @@
           currency,
         },
         entry: clone(this.value),
-        formattedValue: parseFloat(this.value.value).toFixed(2),
       }
+    },
+    computed: {
+      formattedValue () {
+        return parseFloat(this.entry.value).toFixed(2)
+      },
     },
     watch: {
       entry: {
@@ -81,13 +86,21 @@
       },
     },
     methods: {
-      setDecimals (val) {
-        console.log(val)
+      resetForm () {
+        this.entry = {
+          id: 0,
+          label: '',
+          date: undefined,
+          user_id: 1,
+          value: 0
+        }
+        if (typeof this.$refs.datetimePicker !== 'undefined') {
+          this.$refs.datetimePicker.resetForm()
+        }
       },
       updateValue (val) {
         this.entry.value = parseFloat(val)
-        this.formattedValue = this.entry.value.toFixed(2)
-      }
+      },
     },
   }
 </script>

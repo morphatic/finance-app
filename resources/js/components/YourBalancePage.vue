@@ -29,7 +29,6 @@ import TheBalanceHeader from '@/js/components/TheBalanceHeader'
     },
     data () {
       return {
-        entries: [],
         entriesPerPage: 100,
         isUploading: false,
         page: 1,
@@ -38,16 +37,16 @@ import TheBalanceHeader from '@/js/components/TheBalanceHeader'
     },
     computed: {
       balance () {
-        return this.entries.reduce((bal, e) => bal + e, 0)
+        return this.entries.reduce((bal, e) => bal + parseFloat(e.value), 0)
+      },
+      entries () {
+        return this.$store.state.entries
       },
       visibleEntries () {
         const start = (this.page - 1) * this.entriesPerPage
         const end = start + this.entriesPerPage
         return this.entries.slice(start, end)
       }
-    },
-    mounted () {
-      // populate entries from API
     },
   }
 </script>

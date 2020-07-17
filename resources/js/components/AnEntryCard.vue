@@ -1,22 +1,30 @@
 <template>
   <v-card>
-    <v-card-title>
+    <v-card-title class="pa-0">
       <v-row align="center">
-        <v-col v-if="isNew" class="text-h5 pl-6 font-weight-bold">
+        <v-col v-if="isNew" class="text-h5 py-6 pl-10 font-weight-bold">
           Add Balance Entry
         </v-col>
-        <v-col v-else>
+        <v-col
+          v-else
+          class="pa-0"
+        >
           <v-row
+            align="center"
+            class="px-8"
             @mouseover="isHovering = !isEditing"
             @mouseleave="isHovering = false"
           >
-            <v-col cols="3">
-              <p class="subtitle-1">{{ entry.label }}</p>
-              <p class="overline">{{ entry.date }}</p>
+            <v-col class="py-3" cols="8" md="4" style="line-height: 1.25">
+              <span class="font-weight-bold">{{ entry.label }}</span><br>
+              <span class="grey--text text--darken-2" style="font-size: .75rem;">
+                {{ format(new Date(entry.date), "d MMM, y 'at' h:mm a") }}
+              </span>
             </v-col>
-            <v-spacer />
+            <v-spacer class="d-none d-md-flex" />
             <v-col
               v-if="isHovering"
+              class="px-0"
               cols="1"
             >
               <v-btn
@@ -30,6 +38,7 @@
             </v-col>
             <v-col
               v-if="isHovering"
+              class="px-0"
               cols="1"
             >
               <v-btn
@@ -42,22 +51,23 @@
               </v-btn>
             </v-col>
             <v-col
-              cols="2"
-              class="subtitle-1 text-right"
-            >
-              {{ entry.value }}
-            </v-col>
+              v-html="formatValue(entry.value)"
+              cols="4"
+              md="3"
+              class="py-0 text-right"
+              style="font-size: 1rem; font-weight: 600;"
+            />
           </v-row>
         </v-col>
       </v-row>
     </v-card-title>
     <div v-if="isNew || isEditing">
     <v-divider />
-    <v-card-text class="px-10">
-      <an-entry-form v-model="entry" />
+    <v-card-text class="px-8">
+      <an-entry-form ref="entryForm" v-model="entry" />
     </v-card-text>
     <v-divider />
-    <v-card-actions class="px-10 py-6">
+    <v-card-actions class="px-8 py-6">
       <v-spacer />
       <v-btn
         class="px-6"
@@ -73,7 +83,7 @@
         color="primary white--text"
         :elevation="0"
         large
-        @click="$emit('done', true)"
+        @click="update"
       >
         {{ isNew ? 'Save' : 'Update' }} Entry
       </v-btn>
@@ -83,6 +93,7 @@
 </template>
 
 <script>
+  import { format } from 'date-fns'
   import { clone } from '@/js/utilities'
   import AnEntryForm from '@/js/components/AnEntryForm'
   export default {
@@ -100,7 +111,8 @@
         default: () => ({
           id: 0,
           label: '',
-          date: '',
+          date: undefined,
+          user_id: 1,
           value: 0,
         }),
       },
@@ -125,7 +137,33 @@
     methods: {
       cancel () {
         this.entry = this.originalEntry
+        this.isEditing = false
         this.$emit('cancel', true)
+      },
+      deleteEntry () {
+        this.$store.dispatch('deleteEntry', this.entry.id)
+      },
+      format,
+      formatValue (val) {
+        if (val < 0) {
+          return '<span>- $ ' + Math.abs(val).toFixed(2) + '</span>'
+        } else {
+          return '<span class="success--text">+ $ ' + parseFloat(val).toFixed(2) + '</span>'
+        }
+      },
+      resetForm () {
+        if (typeof this.$refs.entryForm !== 'undefined') {
+          this.$refs.entryForm.resetForm()
+        }
+      },
+      update () {
+        if (this.isEditing) {
+          console.log(this.entry, this.isEditing)
+          this.$store.dispatch('updateEntry', this.entry)
+          this.isEditing = false
+        } else {
+          this.$emit('done', true)
+        }
       },
     },
   }
