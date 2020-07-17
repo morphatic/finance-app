@@ -7,12 +7,12 @@
     <template #activator="{ attrs, on }">
       <v-btn
         v-bind="attrs"
-        class="ml-3"
+        class="ml-3 pl-2"
         color="primary"
         v-on="on"
         @click="resetForm"
       >
-        <v-icon>{{ icons.add }}</v-icon>
+        <v-icon class="mr-2">{{ icons.add }}</v-icon>
         Add Entry
       </v-btn>
     </template>

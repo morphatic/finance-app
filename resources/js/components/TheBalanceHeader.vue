@@ -4,12 +4,12 @@
     style="max-width: 800px;"
   >
     <v-row align="center" justify="center" style="height: 120px;">
-      <v-col class="text-h5 white--text">
+      <v-col class="text-h5 white--text" cols="8">
         Your Balance
         <an-add-entry-dialog @save="save" />
-        <!-- <a-csv-dialog /> -->
+        <a-csv-dialog />
       </v-col>
-      <v-col>
+      <v-col cols="4">
         <v-row>
           <v-col
             class="pb-0 text-uppercase grey--text text-right"
@@ -31,12 +31,12 @@
 </template>
 
 <script>
-  // import ACSVDialog from '@/js/components/ACSVDialog'
+  import ACSVDialog from '@/js/components/ACSVDialog'
   import AnAddEntryDialog from '@/js/components/AnAddEntryDialog'
   export default {
     name: 'BalanceHeader',
     components: {
-      // 'a-csv-dialog': ACSVDialog,
+      'a-csv-dialog': ACSVDialog,
       AnAddEntryDialog,
     },
     props: {
