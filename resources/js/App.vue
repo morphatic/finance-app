@@ -19,7 +19,10 @@
       <notification-menu />
     </v-app-bar>
     <v-main>
-      <v-container fluid class="pa-0">
+      <v-container
+        class="pa-0"
+        fluid
+      >
         <!-- NOTE: If adapted to become a multi-page app, router output would go here -->
         <your-balance-page />
       </v-container>
