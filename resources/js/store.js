@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import avatar from '@/images/avatar.png'
 import axios from 'axios'
-import { entrySorter } from '@/js/utilities'
+import { calculateDayTotals, entrySorter } from '@/js/utilities'
 
 Vue.use(Vuex)
 
@@ -13,11 +13,13 @@ const LOAD_ENTRIES = 'LOAD_ENTRIES'
 const ADD_ENTRY = 'ADD_ENTRY'
 const UPDATE_ENTRY = 'UPDATE_ENTRY'
 const DELETE_ENTRY = 'DELETE_ENTRY'
-// const UPLOAD_ENTRIES = 'UPLOAD_ENTRIES' // TBD in phase 2
+const UPLOAD_ENTRIES = 'UPLOAD_ENTRIES'
+const UPDATE_COUNT = 'UPDATE_COUNT'
 
 export const store = new Vuex.Store({
   state: {
     error: null,
+    isLoading: true,
     isUpdating: false,
     isUploading: false,
     user: {
@@ -26,6 +28,8 @@ export const store = new Vuex.Store({
       name: 'Molly Green',
     },
     entries: [],
+    totals: {},
+    uploadingCount: 0,
   },
   mutations: {
     [SET_UPDATING] (state, val) {
@@ -39,9 +43,12 @@ export const store = new Vuex.Store({
     },
     [LOAD_ENTRIES] (state, entries) {
       state.entries = entries
+      state.totals = calculateDayTotals(state.entries)
+      state.isLoading = false
     },
     [ADD_ENTRY] (state, entry) {
       state.entries = [...state.entries, entry].sort(entrySorter)
+      state.totals = calculateDayTotals(state.entries)
     },
     [UPDATE_ENTRY] (state, entry) {
       const i = state.entries.findIndex(e => e.id === entry.id)
@@ -52,6 +59,7 @@ export const store = new Vuex.Store({
       } else {
         state.entries = [...state.entries.slice(0, i - 1), entry, ...state.entries.slice(i)].sort(entrySorter)
       }
+      state.totals = calculateDayTotals(state.entries)
     },
     [DELETE_ENTRY] (state, id) {
       if (state.entries.length === 1) {
@@ -66,6 +74,15 @@ export const store = new Vuex.Store({
           state.entries = [...state.entries.slice(0, i - 1), ...state.entries.slice(i)]
         }
       }
+      state.totals = calculateDayTotals(state.entries)
+    },
+    [UPLOAD_ENTRIES] (state, entries) {
+      // add the new entries to the existing entries and sort them
+      state.entries = [...state.entries, ...entries].sort(entrySorter)
+      state.totals = calculateDayTotals(state.entries)
+    },
+    [UPDATE_COUNT] (state, count) {
+      state.uploadingCount = count
     },
   },
   actions: {
@@ -82,10 +99,8 @@ export const store = new Vuex.Store({
       commit(SET_UPDATING, true)
       // request entries from the API
       axios.get('/api/entries')
-        // then transform dates into ISO 8601 format
-        .then(res => res.data.map(e => ({ ...e, date: (new Date(e.date)).toISOString() })))
         // then sort them by date descending
-        .then(entries => entries.sort(entrySorter))
+        .then(({ data: entries }) => entries.sort(entrySorter))
         // then update the store
         .then(entries => { commit(LOAD_ENTRIES, entries) })
         // catch errors
@@ -132,5 +147,16 @@ export const store = new Vuex.Store({
         // unset the updating flag
         .finally(() => { commit(SET_UPDATING, false) })
     },
+    uploadEntries({ commit }, data) {
+      commit(SET_UPLOADING, true)
+
+      axios.post('api/entries', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .then(({ data: entries }) => {  commit(UPLOAD_ENTRIES, entries) })
+        .catch(error => { commit(SET_ERROR, error) })
+        .finally(() => { commit(SET_UPLOADING, false) })
+    },
+    updateCount({ commit }, count) {
+      commit(UPDATE_COUNT, count)
+    }
   },
 })

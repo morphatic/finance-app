@@ -9,6 +9,7 @@
         v-bind="attrs"
         class="ml-3 pl-2"
         color="primary"
+        :disabled="$store.state.isUploading"
         v-on="on"
         @click="resetForm"
       >
