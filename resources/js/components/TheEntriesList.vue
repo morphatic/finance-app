@@ -1,9 +1,10 @@
 <template>
   <v-container
-  class="my-0 mx-auto py-0"
-  style="max-width: 800px;"
+    class="my-0 mx-auto py-0"
+    style="max-width: 800px;"
   >
-
+    <the-importing-entries-alert v-if="$store.state.isUploading" />
+    <the-loading-entries-alert v-if="$store.state.isLoading" />
     <template v-for="e in groupedEntries">
       <v-row
         v-if="e.type === 'sub'"
@@ -30,16 +31,40 @@
         :key="e.id"
       />
     </template>
+    <p v-if="$store.state.entries.length === 0" class="mt-6">
+      You do not have any balance entries.
+    </p>
+    <v-fab-transition>
+      <v-btn
+        v-show="fab"
+        v-scroll="onScroll"
+        bottom
+        color="primary"
+        dark
+        fab
+        fixed
+        large
+        right
+        @click="toTop"
+      >
+        <v-icon>{{ icons.up }}</v-icon>
+      </v-btn>
+    </v-fab-transition>
   </v-container>
 </template>
 
 <script>
+  import { mdiChevronUp } from '@mdi/js'
   import { differenceInCalendarDays, format } from 'date-fns'
   import AnEntryCard from '@/js/components/AnEntryCard'
+  import TheImportingEntriesAlert from '@/js/components/TheImportingEntriesAlert'
+  import TheLoadingEntriesAlert from '@/js/components/TheLoadingEntriesAlert'
   export default {
     name: 'TheEntriesList',
     components: {
       AnEntryCard,
+      TheImportingEntriesAlert,
+      TheLoadingEntriesAlert,
     },
     props: {
       entries: {
@@ -47,6 +72,14 @@
         default: () => [],
       },
     },
+    data: () => ({
+      fab: false,
+      icons: {
+        up: mdiChevronUp,
+      },
+      offsetTop: 0,
+      windowHeight: window.innerHeight,
+    }),
     computed: {
       groupedEntries () {
         let day, daydex, diff
@@ -62,11 +95,8 @@
             grp.push({
               type: 'sub',
               date: label,
-              value: parseFloat(e.value),
+              value: this.$store.state.totals[date],
             })
-          } else {
-            // no, update the total for the current date
-            grp[daydex].value += parseFloat(e.value)
           }
           grp.push({ type: 'entry', ...e })
           return grp
@@ -80,7 +110,19 @@
         } else {
           return '<span class="success--text">+ $ ' + parseFloat(val).toFixed(2) + '</span>'
         }
+      },
+      onScroll (e) {
+        if (typeof window === 'undefined') return
+        const top = (
+          window.pageYOffset ||
+          document.documentElement.offsetTop ||
+          0
+        )
+        this.fab = top > 300
+      },
+      toTop () {
+        this.$vuetify.goTo(0)
       }
-    }
+    },
   }
 </script>

@@ -14,6 +14,12 @@
         We're uploading {{ uploadCount }} balance entries. Sit tight.
       </v-alert>
       <the-entries-list :entries="visibleEntries" />
+      <v-pagination
+        v-model="page"
+        :length="pageCount"
+        :total-visible="10"
+        @click="$vuetify.goTo(0, { duration: 300, easing: 'easeInOutCubic', offset: 0 })"
+      />
     </v-col>
   </v-row>
 </template>
@@ -41,6 +47,9 @@ import TheBalanceHeader from '@/js/components/TheBalanceHeader'
       },
       entries () {
         return this.$store.state.entries
+      },
+      pageCount () {
+        return Math.ceil(this.entries.length / this.entriesPerPage)
       },
       visibleEntries () {
         const start = (this.page - 1) * this.entriesPerPage
